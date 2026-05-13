@@ -10,7 +10,6 @@
  *
  */
 
-const _ = require('underscore');
 const crypto = require('crypto');
 const moment = require('moment');
 const os = require('os');
@@ -44,11 +43,11 @@ const moduleInfo = require('./package.json');
  */
 
 /**
- * @typedef {'assess' | 'author' | 'items' | 'reports' | 'questions' | 'data'} Service
+ * @typedef {'assess' | 'author' | 'authoraide' | 'items' | 'reports' | 'questions' | 'data'} Service
  */
 
 /**
- * @typedef {'get' | 'set' | 'update'} Action
+ * @typedef {'get' | 'set' | 'update' | 'post'} Action
  */
 
 /**
@@ -58,7 +57,7 @@ const moduleInfo = require('./package.json');
  * @returns {RequestPacket}
  */
 function convertRequestPacketToObject(requestPacket) {
-    if (_.isString(requestPacket)) {
+    if (typeof requestPacket === 'string') {
         return JSON.parse(requestPacket);
     } else {
         return requestPacket;
@@ -239,7 +238,7 @@ LearnositySDK.prototype.init = function (
     }
 
     // Automatically populate the user_id of the security packet.
-    if (_.contains(['author', 'items', 'reports', 'authoraide'], service)) {
+    if (['author', 'items', 'reports', 'authoraide'].includes(service)) {
         // The Events API requires a user_id, so we make sure it's a part
         // of the security packet as we share the signature in some cases
         if (!securityPacket.user_id && requestObject && requestObject.user_id) {
@@ -270,13 +269,13 @@ LearnositySDK.prototype.init = function (
         // Questions API Requests don't need `domain`
         delete securityPacket.domain;
 
-        output = _.extend(securityPacket, requestObject);
+        output = Object.assign(securityPacket, requestObject);
     } else if (service === 'assess') {
         output = requestObject;
     } else {
         output = {
             'security': securityPacket,
-            'request': _.isString(requestPacket) ? requestString : requestObject
+            'request': typeof requestPacket === 'string' ? requestString : requestObject
         };
     }
 
